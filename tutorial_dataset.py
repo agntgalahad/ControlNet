@@ -1,8 +1,13 @@
 import json
 import cv2
 import numpy as np
-
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms, utils
+import json
+import PIL.Image as Image
+import os
+from torchvision.datasets import CocoCaptions
+from skimage.color import rgb2lab, lab2rgb
 
 
 class MyDataset(Dataset):
@@ -37,3 +42,39 @@ class MyDataset(Dataset):
 
         return dict(jpg=target, txt=prompt, hint=source)
 
+class CocoDataset(Dataset):
+    def __init__(self, root, annFile, transform) -> None:
+        self.root = root
+        self.annFile = annFile
+        self.transform = transform
+        with open(annFile, 'r') as f:
+            self.data = json.load(f)
+        self.ids = list(sorted(self.data.keys()))
+        
+    def __len__(self):
+        return len(self.ids) 
+    
+    def __getitem__(self, index):
+        source, target = self._load_image(index)
+        caption = self._load_caption(index)
+        if self.transform:
+            image = self.transform(image)
+        return dict(jpg=image, txt=caption, hint=source)
+    
+    def _load_image(self, index):
+        path = self.ids[index]
+        # img = Image.open(os.path.join(self.root, path)).convert("RGB")
+        img = cv2.imread(os.path.join(self.root, path))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = self.transform(img)
+        bw_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        # img_lab = rgb2lab(img).astype("float32")  # Converting RGB to L*a*b
+        # img_lab = transforms.ToTensor()(img_lab)
+        # L = img_lab[[0], ...] / 50. - 1.  # Between -1 and 1
+        # ab = img_lab[[1, 2], ...] / 110.  # Between -1 and 1
+        # return {"L": L, "ab": ab, 'img': img}
+        return bw_img, img
+
+    def _load_caption(self, index):
+        return self.data[self.ids[index]]
+    

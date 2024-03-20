@@ -2,9 +2,16 @@ from share import *
 
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from tutorial_dataset import MyDataset
+from tutorial_dataset import MyDataset, CocoDataset
 from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
+import torchvision.transforms as transforms
+
+IMG_SIZE = 512
+trasformation = transforms.Compose([
+    transforms.Resize([IMG_SIZE, IMG_SIZE]),
+    transforms.ToTensor(),
+])
 
 
 # Configs
@@ -25,7 +32,8 @@ model.only_mid_control = only_mid_control
 
 
 # Misc
-dataset = MyDataset()
+# dataset = MyDataset()
+dataset = CocoDataset(root='./data/coco', annFile='./data/coco/annotations/selected_train.json', transform=None)
 dataloader = DataLoader(dataset, num_workers=0, batch_size=batch_size, shuffle=True)
 logger = ImageLogger(batch_frequency=logger_freq)
 trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
