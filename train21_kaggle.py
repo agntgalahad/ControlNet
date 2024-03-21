@@ -14,7 +14,7 @@ trasformation = transforms.Compose([
 ])
 
 # Configs
-resume_path = './ControlNet/models/control_sd21_ini.ckpt'
+resume_path = './ControlNet/models/colorizenet-sd21.ckpt'
 batch_size = 4
 logger_freq = 300
 learning_rate = 1e-5
