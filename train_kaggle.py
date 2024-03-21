@@ -33,7 +33,7 @@ model.only_mid_control = only_mid_control
 
 # Misc
 # dataset = MyDataset()
-dataset = CocoDataset(root='/kaggle/input/coco-2017-dataset/coco2017/train2017', annFile='/content/drive/MyDrive/coco_train_2017/annotation/selected_train.json', transform=None)
+dataset = CocoDataset(root='/kaggle/input/coco-2017-dataset/coco2017/train2017', annFile='selected_train.json', transform=None)
 dataloader = DataLoader(dataset, num_workers=0, batch_size=batch_size, shuffle=True)
 logger = ImageLogger(batch_frequency=logger_freq)
 trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
