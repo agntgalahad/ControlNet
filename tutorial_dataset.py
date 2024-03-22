@@ -4,7 +4,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import json
-import PIL.Image as Image
+from PIL import Image, ImageOps
 import os
 from torchvision.datasets import CocoCaptions
 from skimage.color import rgb2lab, lab2rgb
@@ -57,17 +57,22 @@ class CocoDataset(Dataset):
     def __getitem__(self, index):
         source, target = self._load_image(index)
         caption = self._load_caption(index)
-        if self.transform:
-            image = self.transform(image)
-        return dict(jpg=image, txt=caption, hint=source)
+        return dict(jpg=target, txt=caption, hint=source)
     
     def _load_image(self, index):
         path = self.ids[index]
-        # img = Image.open(os.path.join(self.root, path)).convert("RGB")
-        img = cv2.imread(os.path.join(self.root, path))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = Image.open(os.path.join(self.root, path)).convert("RGB")
+#         img = cv2.imread(os.path.join(self.root, path))
+#         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        
+        bw_img = ImageOps.grayscale(img)
+        bw_img = bw_img.astype(np.float32) / 255.0
+
+        # Normalize target images to [-1, 1].
+        img = (img.astype(np.float32) / 127.5) - 1.0
         img = self.transform(img)
-        bw_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        bw_img = self.transform(bw_img)
+#         bw_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         # img_lab = rgb2lab(img).astype("float32")  # Converting RGB to L*a*b
         # img_lab = transforms.ToTensor()(img_lab)
         # L = img_lab[[0], ...] / 50. - 1.  # Between -1 and 1
