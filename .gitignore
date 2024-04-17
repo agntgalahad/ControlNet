@@ -1,12 +1,11 @@
 .idea/
-
+.gitignore
 training/
 lightning_logs/
 image_log/
 
 *.pth
 *.pt
-*.ckpt
 *.safetensors
 
 gradio_pose2image_private.py
